@@ -1,5 +1,5 @@
 {
-  "name": "make-request",
+  "name": "@dnpr/make-request",
   "version": "0.1.0",
   "description": "A simple HTTP/HTTPS agent for Node.js.",
   "main": "lib/index.js",
