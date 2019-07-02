@@ -1,0 +1,19 @@
+{
+  "name": "make-request",
+  "version": "0.1.0",
+  "description": "A simple HTTP/HTTPS agent for Node.js.",
+  "main": "lib/index.js",
+  "directories": {
+    "example": "examples",
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node test/make-request.js"
+  },
+  "author": "dragonman225",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^6.0.1"
+  }
+}
