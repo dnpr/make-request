@@ -11,8 +11,16 @@
   "scripts": {
     "test": "node test/make-request.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dnpr/make-request.git"
+  },
   "author": "dragonman225",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dnpr/make-request/issues"
+  },
+  "homepage": "https://github.com/dnpr/make-request",
   "devDependencies": {
     "eslint": "^6.0.1"
   }
