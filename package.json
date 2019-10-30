@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/dnpr/make-request",
   "devDependencies": {
-    "eslint": "^6.0.1"
+    "eslint": "^6.6.0"
   }
 }
