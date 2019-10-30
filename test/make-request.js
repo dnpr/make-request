@@ -1,32 +1,30 @@
 const { makeHTTPSRequest, makeHTTPRequest } = require('../lib')
 
+const BASE_URL = 'httpbin.org'
+const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
+
+const headers = {
+  'accept': '*/*',
+  'accept-encoding': 'gzip, deflate, br',
+  'accept-language': 'en-US,en;q=0.9',
+  'user-agent': USER_AGENT
+}
+
 const httpsAgentOptions = {
-  hostname: 'httpbin.org',
+  hostname: BASE_URL,
   port: 443,
   path: '/get',
   method: 'GET',
-  headers: {
-    'accept': '*/*',
-    'accept-encoding': 'gzip, deflate, br',
-    'accept-language': 'en-US,en;q=0.9',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
-  }
+  headers
 }
 
 const httpAgentOptions = {
-  hostname: 'httpbin.org',
+  hostname: BASE_URL,
   port: 80,
   path: '/get',
   method: 'GET',
-  headers: {
-    'accept': '*/*',
-    'accept-encoding': 'gzip, deflate, br',
-    'accept-language': 'en-US,en;q=0.9',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
-  }
+  headers
 }
-
-main()
 
 async function main() {
   try {
@@ -49,3 +47,5 @@ async function main() {
     console.error(error)
   }
 }
+
+main()
