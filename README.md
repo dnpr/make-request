@@ -76,14 +76,18 @@ main()
 
 ## Development
 
-Clone the repository and setup.
+### Project Structure
+
+![project structure graph](documentation/dependency-graph.svg)
+
+### Setup
 
 ```bash
 git clone https://github.com/dnpr/make-request.git
 yarn install
 ```
 
-Run tests.
+### Run tests
 
 ```bash
 npm test
