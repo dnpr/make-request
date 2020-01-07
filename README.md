@@ -16,40 +16,62 @@ npm install @dnpr/make-request
 
 ## Usage
 
-```javascript
-const { makeHTTPSRequest } = require('@dnpr/make-request')
+```typescript
+import { makeRequest } from "@dnpr/make-request"
 
-const BASE_URL = 'httpbin.org'
-const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
-
-const headers = {
-  'accept': '*/*',
-  'accept-encoding': 'gzip, deflate, br',
-  'accept-language': 'en-US,en;q=0.9',
-  'user-agent': USER_AGENT
-}
-
-/** The same as options in NodeJS https.request() */
-const httpsAgentOptions = {
-  hostname: BASE_URL,
-  port: 443,
-  path: '/get',
-  method: 'GET',
-  headers
-}
+const httpTarget = "http://httpbin.org"
+const httpsTarget = "https://httpbin.org"
+const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
 
 async function main() {
+
+  const headers = {
+    "accept": "*/*",
+    "accept-encoding": "gzip, deflate, br",
+    "accept-language": "en-US,en;q=0.9",
+    "user-agent": USER_AGENT
+  }
+
+  const testBody = {
+    message: "hello world"
+  }
+
   try {
-    let res = await makeHTTPSRequest(httpsAgentOptions)
-    let resParsed = {
-      statusCode: res.statusCode,
-      data: JSON.parse(res.responseBuffer)
-    }
-    console.log(resParsed)
-  } catch {
+
+    /** A GET request with HTTP. */
+    const testHttp = makeRequest("GET", httpTarget + "/get")()
+    console.log((await testHttp).data.toString())
+
+    /** A GET request with HTTPS. */
+    const testHttps = makeRequest("GET", httpsTarget + "/get")()
+    console.log((await testHttps).data.toString())
+
+    /** A GET request with HTTPS and headers. */
+    const testHttpsHeader =
+      makeRequest("GET", httpsTarget + "/get")
+        .useHeaders(headers)()
+    console.log((await testHttpsHeader).data.toString())
+
+    /** A POST request with JSON. */
+    const testJson =
+      makeRequest("POST", "https://reqbin.com/echo/post/json")
+        .useSerializer(JSON.stringify)
+        .useDeserializer(JSON.parse)({
+          login: "login", password: "password"
+        })
+    console.log((await testJson).data)
+
+    /** A bad POST request with incorrectly serialized body. */
+    const testBadJson =
+      makeRequest("POST", "https://reqbin.com/echo/post/json")(testBody)
+    console.log((await testBadJson).data)
+
+  } catch (error) {
     console.error(error)
   }
 }
+
+main()
 ```
 
 ## Development
@@ -58,7 +80,7 @@ Clone the repository and setup.
 
 ```bash
 git clone https://github.com/dnpr/make-request.git
-npm install # or any package manager
+yarn install
 ```
 
 Run tests.
