@@ -20,31 +20,31 @@ async function main() {
   try {
 
     /** A GET request with HTTP. */
-    const testHttp = makeRequest("GET", httpTarget + "/get")()
+    const testHttp = makeRequest("GET", httpTarget + "/get").send()
     console.log((await testHttp).data.toString())
 
     /** A GET request with HTTPS. */
-    const testHttps = makeRequest("GET", httpsTarget + "/get")()
+    const testHttps = makeRequest("GET", httpsTarget + "/get").send()
     console.log((await testHttps).data.toString())
 
     /** A GET request with HTTPS and headers. */
     const testHttpsHeader =
       makeRequest("GET", httpsTarget + "/get")
-        .useHeaders(headers)()
+        .setHeaders(headers).send()
     console.log((await testHttpsHeader).data.toString())
 
     /** A POST request with JSON. */
     const testJson =
       makeRequest("POST", "https://reqbin.com/echo/post/json")
-        .useSerializer(JSON.stringify)
-        .useDeserializer(JSON.parse)({
+        .setSerializer(JSON.stringify)
+        .setDeserializer(JSON.parse).send({
           login: "login", password: "password"
         })
     console.log((await testJson).data)
 
     /** A bad POST request with incorrectly serialized body. */
     const testBadJson =
-      makeRequest("POST", "https://reqbin.com/echo/post/json")(testBody)
+      makeRequest("POST", "https://reqbin.com/echo/post/json").send(testBody)
     console.log((await testBadJson).data)
 
   } catch (error) {

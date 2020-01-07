@@ -17,7 +17,7 @@ function makeRequest(verb: string, url: string) {
   const [request, responsePromise] = createHttpRequest(verb, url)
   let serializer, deserializer
 
-  const execute = async function (requestData?: any) {
+  const send = async function (requestData?: any) {
     try {
 
       /** Serialize request body. */
@@ -58,26 +58,33 @@ function makeRequest(verb: string, url: string) {
     }
   }
 
-  execute.useSerializer = function (f: Function) {
+  const setSerializer = function (f: Function) {
     if (typeof f === "function") serializer = f
-    return execute
+    return self
   }
 
-  execute.useDeserializer = function (f: Function) {
+  const setDeserializer = function (f: Function) {
     if (typeof f === "function") deserializer = f
-    return execute
+    return self
   }
 
-  execute.useHeaders = function (h: object) {
+  const setHeaders = function (h: object) {
     if (typeof h === "object") {
       for (let [key, value] of Object.entries(h)) {
         request.setHeader(key, value)
       }
     }
-    return execute
+    return self
   }
 
-  return execute
+  const self = {
+    send,
+    setSerializer,
+    setDeserializer,
+    setHeaders
+  }
+
+  return self
 }
 
 function createHttpRequest(
