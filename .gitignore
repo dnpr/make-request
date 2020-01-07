@@ -1,12 +1,10 @@
 # Node.js
 node_modules/
-package-lock.json
 
-# pnpm lockfile
+# Package manager lockfiles
 pnpm-lock.yaml
-
-# Logs
-*.log
+package-lock.json
+yarn.lock
 
 # macOS
 .DS_Store
@@ -27,4 +25,8 @@ pnpm-lock.yaml
 !.vscode/extensions.json
 
 # Project
-TODO.md
+test/*
+!test/index.spec.ts
+*.log
+dist/
+typedoc/

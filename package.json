@@ -2,26 +2,42 @@
   "name": "@dnpr/make-request",
   "version": "0.1.1",
   "description": "A simple HTTP/HTTPS agent for Node.js.",
-  "main": "lib/index.js",
-  "directories": {
-    "example": "examples",
-    "lib": "lib",
-    "test": "test"
-  },
+  "author": "dragonman225",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "node test/make-request.js"
+    "build": "npm run build:module && npm run build:doc",
+    "build:module": "rm -rf dist && rollup -c && tsc --emitDeclarationOnly",
+    "build:doc": "npm run build:typedoc && npm run build:dependency-graph",
+    "build:typedoc": "typedoc --out typedoc --mode file src/",
+    "build:dependency-graph": "npx depcruise --exclude '^(node_modules|src/interfaces)' --output-type dot --prefix 'https://github.com/dragonman225/notionapi-agent/tree/master/' src/index.ts | dot -T svg > documentation/dependency-graph.svg",
+    "test": "ts-node test/index.spec.ts",
+    "release": "npm run build && npm publish",
+    "upgrade": "node tools/upgrade-deps.js"
   },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^2.0.1",
+    "@types/node": "^13.1.1",
+    "@typescript-eslint/eslint-plugin": "^2.13.0",
+    "@typescript-eslint/parser": "^2.13.0",
+    "dependency-cruiser": "^6.1.0",
+    "eslint": "^6.8.0",
+    "rollup": "^1.27.14",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.4"
+  },
+  "files": [
+    "dist/"
+  ],
+  "homepage": "https://github.com/dnpr/make-request",
   "repository": {
     "type": "git",
     "url": "https://github.com/dnpr/make-request.git"
   },
-  "author": "dragonman225",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/dnpr/make-request/issues"
   },
-  "homepage": "https://github.com/dnpr/make-request",
-  "devDependencies": {
-    "eslint": "^6.6.0"
-  }
+  "typeScriptVersion": "3.7",
+  "runkitExampleFilename": ""
 }
