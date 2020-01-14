@@ -25,8 +25,8 @@ yarn.lock
 !.vscode/extensions.json
 
 # Project
-test/*
-!test/index.spec.ts
+test/image.jpg
+test/test_res.json
 *.log
 dist/
 typedoc/

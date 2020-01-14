@@ -16,6 +16,6 @@ export default {
   plugins: [typescript()],
   external: [
     ...Object.keys(pkg.dependencies || {}),
-    "url", "http", "https", "zlib"
+    "url", "http", "https", "stream", "zlib"
   ]
 }
