@@ -1,9 +1,13 @@
 import * as http from "http"
 import * as https from "https"
+import * as stream from "stream"
 import * as zlib from "zlib"
 import { URL } from "url"
 
-import { inferPort, isProtocolSupported } from "./util"
+import {
+  inferPort, isProtocolSupported, decompressStream,
+  startStream, endStream
+} from "./util"
 import { BadRequestError } from "./error/BadRequestError"
 import { UnsupportedProtocolError } from "./error/UnsupportedProtocolError"
 
@@ -171,4 +175,134 @@ function collectResponse(
 
 }
 
-export { makeRequest }
+
+
+/**
+ * Create a http.clientRequest instance.
+ * @param verb 
+ * @param url 
+ */
+function createClientRequest(verb: string, url: string) {
+
+  const structuredUrl = new URL(url)
+
+  if (!isProtocolSupported(structuredUrl)) {
+    throw new UnsupportedProtocolError(
+      `${structuredUrl.protocol} is not supported by this library.`
+    )
+  }
+
+  const agentOptions: http.ClientRequestArgs = {
+    hostname: structuredUrl.hostname,
+    port: inferPort(structuredUrl),
+    path: structuredUrl.pathname + structuredUrl.search,
+    method: verb,
+    headers: {}
+  }
+
+  const clientRequest = structuredUrl.protocol === "http:"
+    ? http.request(agentOptions)
+    : https.request(agentOptions)
+
+  return clientRequest
+
+}
+
+
+
+type ResponseInfo =
+  Pick<http.IncomingMessage, "complete" | "headers" | "httpVersion"
+    | "statusCode" | "statusMessage" | "trailers">
+
+/**
+ * RequestStream wraps http.ClientRequest and http.IncomingMessage into 
+ * a duplex stream.
+ */
+class RequestStream extends stream.Duplex {
+
+  request: http.ClientRequest
+  responseReceiver: NodeJS.WritableStream | undefined
+
+  constructor(verb: string, url: string) {
+    super()
+    this.request = createClientRequest(verb, url)
+    this.request.setHeader("accept-encoding", "br, gzip, deflate")
+    this.responseReceiver = undefined
+
+    this.request.on("response", (response) => {
+
+      const responseDecomp = decompressStream(
+        response,
+        response.headers["content-encoding"]
+      )
+
+      if (this.responseReceiver)
+        responseDecomp.pipe(this.responseReceiver as NodeJS.WritableStream)
+
+      responseDecomp.on("error", (err) => {
+        this.emit("error", err)
+      })
+
+      responseDecomp.on("data", (chunk) => {
+        this.emit("data", chunk)
+      })
+
+      responseDecomp.on("close", () => {
+        this.emit("close")
+      })
+
+      responseDecomp.on("end", () => {
+        this.emit("end", {
+          complete: response.complete,
+          headers: response.headers,
+          httpVersion: response.httpVersion,
+          statusCode: response.statusCode,
+          statusMessage: response.statusMessage,
+          trailers: response.trailers
+        } as ResponseInfo)
+      })
+    }) // request.on("response")
+
+    this.request.on("error", (err) => {
+      this.emit("error", err)
+    })
+  } // constructor
+
+  _read() { }
+
+  _write(data: any, encoding: string, cb) {
+    encoding = encoding // since no unused
+    this.request.write(data)
+    cb()
+  }
+
+  end() {
+    this.request.end()
+  }
+
+  pipe(writeStream: NodeJS.WritableStream): NodeJS.ReadableStream | any {
+    this.responseReceiver = writeStream
+    return writeStream
+  }
+
+  setHeaders(h: object) {
+    if (typeof h === "object") {
+      for (let [key, value] of Object.entries(h)) {
+        this.request.setHeader(key, value)
+      }
+    }
+  }
+}
+
+
+
+/**
+ * Create a RequestStream instance.
+ * @param verb - HTTP verb.
+ * @param url - Request URL.
+ */
+function createRequestStream(verb: string, url: string) {
+  return new RequestStream(verb, url)
+}
+
+export { makeRequest, createRequestStream, startStream, endStream }
