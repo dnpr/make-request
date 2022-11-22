@@ -1,85 +1,84 @@
-import { URL } from "url"
-import * as stream from "stream"
-import * as zlib from "zlib"
+import { URL } from 'url'
+import * as stream from 'stream'
+import * as zlib from 'zlib'
 
 /**
  * Infer which port to use.
- * 
+ *
  * @category Util
  */
-function inferPort(url: URL) {
-  const port = url.port
-    ? url.port : (url.protocol === "http:")
-      ? 80 : 443
+function inferPort(url: URL): string {
+  const port = url.port ? url.port : url.protocol === 'http:' ? '80' : '443'
   return port
 }
 
-
-
 /**
  * Check if protocol is supported.
- * 
+ *
  * @category Util
  */
-function isProtocolSupported(url: URL) {
-  return url.protocol === "http:" || url.protocol === "https:"
+function isProtocolSupported(url: URL): boolean {
+  return url.protocol === 'http:' || url.protocol === 'https:'
 }
-
-
 
 /**
  * Create a read stream from some data.
- * @param data 
- * @param _opt 
+ * @param data
+ * @param _opt
  */
-function startStream(data: string, _opt?: { debug?: boolean }) {
+function startStream(
+  data: string,
+  _opt?: { debug?: boolean }
+): stream.Readable {
   const debug = _opt && _opt.debug
   const buffer = Buffer.from(data)
   let ptr = 0
   return new stream.Readable({
-    read(size) {
+    read(size): void {
       if (debug) console.log(size, ptr)
       if (ptr > buffer.length) {
         this.push(null)
       } else {
-        this.push(buffer.slice(ptr, ptr += size))
+        this.push(buffer.slice(ptr, (ptr += size)))
       }
-    }
+    },
   })
 }
-
-
 
 /**
  * Collect all chunks and concat their content as one string.
- * @param readStream 
+ * @param readStream
  */
-function endStream(readStream: NodeJS.ReadableStream) {
+function endStream(readStream: NodeJS.ReadableStream): Promise<string> {
   return new Promise<string>((resolve, reject) => {
-    let chunks: Buffer[] = []
-    readStream.on("data", (chunk) => { chunks.push(chunk) })
-    readStream.on("end", () => { resolve(Buffer.concat(chunks).toString()) })
-    readStream.on("error", (error) => { reject(error) })
+    const chunks: Buffer[] = []
+    readStream.on('data', (chunk) => {
+      chunks.push(chunk)
+    })
+    readStream.on('end', () => {
+      resolve(Buffer.concat(chunks).toString())
+    })
+    readStream.on('error', (error) => {
+      reject(error)
+    })
   })
 }
 
-
-
 /**
  * Decompress a stream.
- * @param iStream 
- * @param encoding 
+ * @param iStream
+ * @param encoding
  */
 function decompressStream(
   iStream: NodeJS.ReadableStream,
-  encoding?: "br" | "gzip" | "deflate" | string
+  encoding?: 'br' | 'gzip' | 'deflate' | string
 ): NodeJS.ReadableStream {
   switch (encoding) {
-    case "br":
+    case 'br':
       return iStream.pipe(zlib.createBrotliDecompress())
-    case "gzip":
+    case 'gzip':
       return iStream.pipe(zlib.createGunzip())
-    case "deflate":
+    case 'deflate':
       return iStream.pipe(zlib.createInflate())
     default:
       return iStream
@@ -87,6 +86,9 @@ function decompressStream(
 }
 
 export {
-  inferPort, isProtocolSupported,
-  startStream, endStream, decompressStream
+  inferPort,
+  isProtocolSupported,
+  startStream,
+  endStream,
+  decompressStream,
 }
